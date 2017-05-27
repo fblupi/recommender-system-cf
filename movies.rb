@@ -4,15 +4,9 @@ class Movies
     @movies = {}
     File.open(filename, 'r').each_line do |line|
       data = line.split('|')
-      @movies[data[0].to_sym] = data[1].to_s
+      id = data[0].to_sym
+      name = data[1].to_s
+      @movies[id] = name
     end
-  end
-
-  def size
-    @movies.length
-  end
-
-  def get_name(id)
-    @movies[id]
   end
 end
