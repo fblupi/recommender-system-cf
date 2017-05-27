@@ -9,4 +9,6 @@ class Movies
       @movies[id] = name
     end
   end
+
+  attr_reader :movies
 end
