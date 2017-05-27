@@ -2,7 +2,7 @@
 class Ratings
   def initialize(filename = 'data/ml-data/u.data')
     @ratings = {}
-    @average_rating = Hash.new(0)
+    @average_rating = Hash.new(0.0)
     File.open(filename, 'r').each_line do |line|
       data = line.split(' ')
       id_user = data[0].to_sym
@@ -16,4 +16,7 @@ class Ratings
       @average_rating[k] /= @ratings[k].length
     end
   end
+
+  attr_reader :ratings
+  attr_reader :average_rating
 end

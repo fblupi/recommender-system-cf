@@ -1,10 +1,13 @@
 require_relative 'movies'
 require_relative 'ratings'
+require_relative 'recommender'
 
 NUM_RATINGS = 20
-RANDOM_RATINGS = false
+NUM_NEIGHBOURHOODS = 10
+RANDOM_RATINGS = true
 
 m = Movies.new
+r = Ratings.new
 
 my_ratings = {}
 
@@ -22,12 +25,15 @@ NUM_RATINGS.times do
   else
     puts "Movie: #{m.movies[id_movie]}"
     puts 'Enter your rating (1-5): '
-    rating = gets.chomp.to_i
+    rating = gets.chomp.to_f
     while rating < 1 || rating > 5
       puts 'Invalid rating. Enter your rating (1-5): '
-      rating = gets.chomp.to_i
+      rating = gets.chomp.to_f
     end
   end
 
   my_ratings[id_movie] = rating
 end
+
+rec = Recommender.new(r.ratings, r.average_rating, my_ratings)
+rec.get_neighbourhoods(NUM_NEIGHBOURHOODS)
