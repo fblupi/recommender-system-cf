@@ -1,4 +1,4 @@
-# Get k-nearest neighbourhoods of a user and recommend films using collaborative filtering with Pearson correlation
+# Get k-nearest neighbourhood of a user and recommend films using collaborative filtering with Pearson correlation
 class Recommender
   def initialize(ratings, avg_ratings, my_ratings)
     @ratings = ratings
@@ -11,49 +11,52 @@ class Recommender
     @my_avg_rating /= @my_ratings.length
   end
 
-  def get_neighbourhoods(num)
-    @neighbourhoods = {}
+  def get_neighbourhood(k)
+    @neighbourhood = {}
     @ratings.each_key do |user|
       matches = []
       @my_ratings.each_key do |movie|
-        matches.push(movie) if @ratings[user].key?(movie)
+        matches.push movie if @ratings[user].key? movie
       end
-      if matches.length > 0
-        numerator = 0.0
-        user_denominator = 0.0
-        other_user_denominator = 0.0
+      if matches.any?
+        num = 0.0
+        user_den = 0.0
+        other_user_den = 0.0
         matches.each do |movie|
           u = @my_ratings[movie] - @my_avg_rating
           v = @ratings[user][movie] - @avg_ratings[user]
-          numerator += u * v
-          user_denominator += u * u
-          other_user_denominator += v * v
+          num += u * v
+          user_den += u * u
+          other_user_den += v * v
         end
-        match_rate = user_denominator == 0 || other_user_denominator == 0 ?
-                         0 : numerator / (Math.sqrt(user_denominator) * Math.sqrt(other_user_denominator))
+        if user_den.zero? || other_user_den.zero?
+          match_rate = 0
+        else
+          match_rate = num / (Math.sqrt(user_den) * Math.sqrt(other_user_den))
+        end
       else
         match_rate = 0
       end
-      @neighbourhoods[user] = match_rate
+      @neighbourhood[user] = match_rate
     end
-    @neighbourhoods = @neighbourhoods.sort_by {|_, v| v }.reverse.first(num).to_h
+    @neighbourhood = @neighbourhood.sort_by { |_, v| v }.reverse.first(k).to_h
   end
 
-  def get_recommendations(movies, num)
+  def get_recommendations(movies, k)
     predicted_ratings = {}
     movies.each_key do |movie|
-      unless @my_ratings.key?(movie)
-        numerator = 0.0
-        denominator = 0.0
-        @neighbourhoods.each_key do |neighbourhood|
-          if @ratings[neighbourhood].key?(movie)
-            match_rate = @neighbourhoods[neighbourhood]
-            numerator += match_rate * (@ratings[neighbourhood][movie] - @avg_ratings[neighbourhood])
-            denominator += match_rate.abs
+      unless @my_ratings.key? movie
+        num = 0.0
+        den = 0.0
+        @neighbourhood.each_key do |neighbour|
+          if @ratings[neighbour].key? movie
+            match_rate = @neighbourhood[neighbour]
+            num += match_rate * (@ratings[neighbour][movie] - @avg_ratings[neighbour])
+            den += match_rate.abs
           end
         end
-        if denominator > 0.0
-          predicted_rating = @my_avg_rating + numerator / denominator
+        if den > 0.0
+          predicted_rating = @my_avg_rating + num / den
           predicted_rating = 5 if predicted_rating > 5
         else
           predicted_rating = 0.0
@@ -61,6 +64,6 @@ class Recommender
         predicted_ratings[movie] = predicted_rating
       end
     end
-    predicted_ratings.sort_by {|_, v| v}.reverse.first(num).to_h
+    predicted_ratings.sort_by { |_, v| v }.reverse.first(k).to_h
   end
 end

@@ -3,7 +3,7 @@ require_relative 'ratings'
 require_relative 'recommender'
 
 NUM_RATINGS = 20
-NUM_NEIGHBOURHOODS = 10
+NUM_NEIGHBOURS = 10
 NUM_RECOMMENDATIONS = 20
 RANDOM_RATINGS = true
 
@@ -17,12 +17,11 @@ random = Random.new
 num_movies = ml_movies.movies.length
 NUM_RATINGS.times do
   id_movie = random.rand(1..num_movies).to_s.to_sym
-  while my_ratings.key?(id_movie)
+  while my_ratings.key? id_movie
     id_movie = random.rand(1..num_movies).to_s.to_sym
   end
-
   if RANDOM_RATINGS
-    rating = random.rand(1..5)
+    rating = random.rand 1..5
   else
     puts "Movie: #{ml_movies.movies[id_movie]}"
     puts 'Enter your rating (1-5): '
@@ -32,14 +31,13 @@ NUM_RATINGS.times do
       rating = gets.chomp.to_f
     end
   end
-
   my_ratings[id_movie] = rating
 end
 
 # generate recommendations
-recommender = Recommender.new(ml_ratings.ratings, ml_ratings.average_rating, my_ratings)
-recommender.get_neighbourhoods(NUM_NEIGHBOURHOODS)
-recommendations = recommender.get_recommendations(ml_movies.movies, NUM_RECOMMENDATIONS)
+recommender = Recommender.new ml_ratings.ratings, ml_ratings.average_rating, my_ratings
+recommender.get_neighbourhood NUM_NEIGHBOURS
+recommendations = recommender.get_recommendations ml_movies.movies, NUM_RECOMMENDATIONS
 
 # print results
 recommendations.each do |k, v|
